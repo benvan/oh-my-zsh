@@ -11,7 +11,7 @@
 xlast(){
   into=$1
   downdir=~/downloads
-  last=$(ls $downdir -t | head -n1)
+  last=$(\ls $downdir -t | head -n1)
 
   if [[ ! -d $into ]]; then
     mkdir $into;

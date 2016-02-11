@@ -10,7 +10,7 @@
 
 xlast(){
   into=$1
-  downdir=~/downloads
+  downdir=~/Downloads
   last=$(\ls $downdir -t | head -n1)
 
   if [[ ! -d $into ]]; then

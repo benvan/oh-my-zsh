@@ -14,6 +14,21 @@ pwd_color=${THEME_PWD_COLOR:-magenta}
 # translate hostnames into shortened, colorcoded strings
 host_repr=('dieter-ws-a7n8x-arch' "%{$fg_bold[green]%}ws" 'dieter-p4sci-arch' "%{$fg_bold[blue]%}p4")
 
+function virtualenv_info(){
+    # Get Virtual Env
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        # Strip out the path and just leave the env name
+        venv="${VIRTUAL_ENV##*/}"
+    else
+        # In case you don't have one activated
+        venv=''
+    fi
+    [[ -n "$venv" ]] && echo "($venv) "
+}
+
+# disable the default virtualenv prompt change
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+
 # local time, color coded by last return code
 time_enabled="%(?.%{$fg[green]%}.%{$fg[red]%})%*%{$reset_color%}"
 time_disabled="%{$fg[green]%}%*%{$reset_color%}"
@@ -30,7 +45,7 @@ local host="@${host_repr[$(hostname)]:-$(hostname)}%{$reset_color%}"
 #local pwd="%{$fg[blue]%}%c%{$reset_color%}"
 local pwd="%{$fg[$tag_color]%}[%{$fg[$pwd_color]%}%30<...<%~%<<%{$fg[$tag_color]%}]%{$reset_color%}"
 
-PROMPT='${time} ${pwd} '
+PROMPT='$(virtualenv_info)${time} ${pwd} '
 
 # git theming
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg_bold[gray]%}(%{$fg_no_bold[yellow]%}%B"

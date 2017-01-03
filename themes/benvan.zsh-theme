@@ -8,6 +8,9 @@
 
 typeset -A host_repr
 
+tag_color=${THEME_TAG_COLOR:-red}
+pwd_color=${THEME_PWD_COLOR:-magenta}
+
 # translate hostnames into shortened, colorcoded strings
 host_repr=('dieter-ws-a7n8x-arch' "%{$fg_bold[green]%}ws" 'dieter-p4sci-arch' "%{$fg_bold[blue]%}p4")
 
@@ -25,7 +28,7 @@ local host="@${host_repr[$(hostname)]:-$(hostname)}%{$reset_color%}"
 
 # Compacted $PWD
 #local pwd="%{$fg[blue]%}%c%{$reset_color%}"
-local pwd="[%{$fg[blue]%}%30<...<%~%<<%{$reset_color%}]"
+local pwd="%{$fg[$tag_color]%}[%{$fg[$pwd_color]%}%30<...<%~%<<%{$fg[$tag_color]%}]%{$reset_color%}"
 
 PROMPT='${time} ${pwd} '
 

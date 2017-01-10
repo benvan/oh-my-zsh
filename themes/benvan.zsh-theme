@@ -10,6 +10,7 @@ typeset -A host_repr
 
 tag_color=${THEME_TAG_COLOR:-red}
 pwd_color=${THEME_PWD_COLOR:-magenta}
+show_host=`[[ -z "$THEME_IS_LOCAL" ]] || echo yes`
 
 # translate hostnames into shortened, colorcoded strings
 host_repr=('dieter-ws-a7n8x-arch' "%{$fg_bold[green]%}ws" 'dieter-p4sci-arch' "%{$fg_bold[blue]%}p4")
@@ -39,13 +40,16 @@ local user="%(!.%{$fg[blue]%}.%{$fg[blue]%})%n%{$reset_color%}"
 
 # Hostname part.  compressed and colorcoded per host_repr array
 # if not found, regular hostname in default color
-local host="@${host_repr[$(hostname)]:-$(hostname)}%{$reset_color%}"
+local host="%{$fg[$tag_color]%}:%{$fg[$pwd_color]%}$(hostname)%{$reset_color%}"
+if [[ -n "$show_host" ]]; then
+  host=""
+fi
 
 # Compacted $PWD
 #local pwd="%{$fg[blue]%}%c%{$reset_color%}"
 local pwd="%{$fg[$tag_color]%}[%{$fg[$pwd_color]%}%30<...<%~%<<%{$fg[$tag_color]%}]%{$reset_color%}"
 
-PROMPT='$(virtualenv_info)${time} ${pwd} '
+PROMPT='$(virtualenv_info)${time}${host} ${pwd} '
 
 # git theming
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg_bold[gray]%}(%{$fg_no_bold[yellow]%}%B"

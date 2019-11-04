@@ -5,15 +5,15 @@ function _start_agent() {
 	zstyle -s :omz:plugins:ssh-agent lifetime lifetime
 
 	# start ssh-agent and setup environment
-	echo starting ssh-agent...
+	echo Starting ssh-agent...
 	ssh-agent -s ${lifetime:+-t} ${lifetime} | sed 's/^echo/#echo/' >! $_ssh_env_cache
 	chmod 600 $_ssh_env_cache
 	. $_ssh_env_cache > /dev/null
 }
 
 function _add_identities() {
-	local id line sig
-	local -a identities loaded not_loaded signatures
+	local id line sig lines
+	local -a identities loaded_sigs loaded_ids not_loaded
 	zstyle -a :omz:plugins:ssh-agent identities identities
 
 	# check for .ssh folder presence
@@ -31,19 +31,21 @@ function _add_identities() {
 		done
 	fi
 
-	# get list of loaded identities' signatures
-	for line in ${(f)"$(ssh-add -l)"}; do loaded+=${${(z)line}[2]}; done
-
-	# get signatures of private keys
-	for id in $identities; do
-		signatures+="$(ssh-keygen -lf "$HOME/.ssh/$id" | awk '{print $2}')	$id"
-	done
+	# get list of loaded identities' signatures and filenames
+	if lines=$(ssh-add -l); then
+		for line in ${(f)lines}; do
+			loaded_sigs+=${${(z)line}[2]}
+			loaded_ids+=${${(z)line}[3]}
+		done
+	fi
 
 	# add identities if not already loaded
-	for sig in $signatures; do
-		id="$(cut -f2 <<< $sig)"
-		sig="$(cut -f1 <<< $sig)"
-		[[ ${loaded[(I)$sig]} -le 0 ]] && not_loaded+="$HOME/.ssh/$id"
+	for id in $identities; do
+		# check for filename match, otherwise try for signature match
+		if [[ ${loaded_ids[(I)$HOME/.ssh/$id]} -le 0 ]]; then
+			sig="$(ssh-keygen -lf "$HOME/.ssh/$id" | awk '{print $2}')"
+			[[ ${loaded_sigs[(I)$sig]} -le 0 ]] && not_loaded+="$HOME/.ssh/$id"
+		fi
 	done
 
 	[[ -n "$not_loaded" ]] && ssh-add ${^not_loaded}
